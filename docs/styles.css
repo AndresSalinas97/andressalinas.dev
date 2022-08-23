@@ -21,8 +21,9 @@ body {
   margin-bottom: 10px;
 }
 
-#subtitle {
+#subtitle p {
   color: dimgray;
+  margin: 0;
 }
 
 #about-heading {
