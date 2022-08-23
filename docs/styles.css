@@ -38,7 +38,15 @@ body {
 
 #social-links {
   margin-top: 30px;
-  word-spacing: 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+#social-links svg {
+  width: 40px;
+  fill: black;
 }
 
 footer {
@@ -65,5 +73,9 @@ footer {
 
   a:visited {
     color: mediumpurple;
+  }
+
+  #social-links svg {
+    fill: white;
   }
 }
