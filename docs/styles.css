@@ -22,8 +22,8 @@ body {
 }
 
 #subtitle p {
-  color: dimgray;
   margin: 0;
+  color: dimgray;
 }
 
 #about-heading {
@@ -31,7 +31,8 @@ body {
   margin-bottom: 5px;
 }
 
-#about {
+#about p {
+  margin: 0;
   text-align: left;
 }
 
