@@ -26,6 +26,11 @@ body {
   color: dimgray;
 }
 
+#subtitle svg {
+  width: 1em;
+  stroke: dimgray;
+}
+
 #about-heading {
   margin-top: 30px;
   margin-bottom: 5px;
@@ -65,6 +70,10 @@ footer {
 
   #subtitle p {
     color: darkgray;
+  }
+
+  #subtitle svg {
+    stroke: darkgray;
   }
 
   a:link {
