@@ -45,3 +45,23 @@ footer {
   font-style: italic;
   font-size: x-small;
 }
+
+/* Automatic dark mode (based on user’s system settings) */
+@media (prefers-color-scheme: dark) {
+  body {
+    color: lightgray;
+    background: #2a2a2a;
+  }
+
+  #subtitle {
+    color: darkgray;
+  }
+
+  a:link {
+    color: dodgerblue; 
+  }
+
+  a:visited {
+    color: mediumpurple; 
+  }
+}
