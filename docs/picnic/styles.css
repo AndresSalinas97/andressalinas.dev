@@ -155,6 +155,9 @@ h1 {
 .utility-button:active { transform: scale(0.97); }
 .utility-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .utility-button:disabled { cursor: default; opacity: 0.45; }
+.home-button { justify-self: end; }
+.home-icon { width: 17px; height: 17px; margin-left: 3px; fill: currentColor; vertical-align: -3px; }
+.back-icon { width: 17px; height: 17px; margin-right: 3px; fill: currentColor; vertical-align: -3px; }
 .brand-button {
   width: 48px;
   height: 48px;

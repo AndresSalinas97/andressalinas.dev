@@ -20,8 +20,9 @@ const sections = {
 
 function topNav() {
   return `<nav class="top-nav" aria-label="Page navigation">
-    <button class="utility-button" type="button" data-nav="back"><span aria-hidden="true">←</span> Back</button>
+    <button class="utility-button" type="button" data-nav="back"><svg class="back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 10H8.2l5.6-5.6L11 1.6 1.1 11.5a.7.7 0 0 0 0 1L11 22.4l2.8-2.8L8.2 14h12.3v-4Z"/></svg> Back</button>
     <button class="brand-button" type="button" data-nav="home" aria-label="Go to Picnic QR home"><img src="assets/picnic-icon-512.png" alt="" /></button>
+    <button class="utility-button home-button" type="button" data-nav="home">Home <svg class="home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.8 10.7 12 2.9l9.2 7.8v9.8c0 .9-.7 1.6-1.6 1.6h-5.1v-7.2h-5v7.2H4.4c-.9 0-1.6-.7-1.6-1.6v-9.8Z"/></svg></button>
   </nav>`;
 }
 
@@ -30,7 +31,7 @@ app.innerHTML = `${topNav()}<div class="screen-content"></div>`;
 const persistentNav = app.querySelector('.top-nav');
 const screen = app.querySelector('.screen-content');
 persistentNav.querySelector('[data-nav="back"]').addEventListener('click', () => activeBack?.());
-persistentNav.querySelector('[data-nav="home"]').addEventListener('click', () => menu('home'));
+persistentNav.querySelectorAll('[data-nav="home"]').forEach(button => button.addEventListener('click', () => menu('home')));
 
 function bindTopNav(onBack) {
   activeBack = onBack;
