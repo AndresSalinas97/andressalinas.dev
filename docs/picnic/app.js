@@ -125,7 +125,7 @@ function showDockQr(kind, prefix, dock, locationIndex) {
 }
 
 function renderDockQrContent(kind, prefix, dock, locationIndex) {
-  const locations = Array.from({ length: 11 }, (_, index) => String((kind === 'ambient' ? 2 : 1) + index * 2).padStart(2, '0'));
+  const locations = Array.from({ length: 12 }, (_, index) => String((kind === 'ambient' ? 2 : 1) + index * 2).padStart(2, '0'));
   const location = locations[locationIndex];
   const previousLocation = locations[(locationIndex - 1 + locations.length) % locations.length];
   const nextLocation = locations[(locationIndex + 1) % locations.length];
