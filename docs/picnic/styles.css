@@ -149,8 +149,6 @@ h1 {
 .utility-button:active { transform: scale(0.97); }
 .utility-button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .utility-button:disabled { cursor: default; opacity: 0.45; }
-.utility-button:last-child { justify-self: end; }
-
 .brand-button {
   width: 48px;
   height: 48px;

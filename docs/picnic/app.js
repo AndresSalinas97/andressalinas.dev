@@ -18,11 +18,10 @@ const sections = {
   },
 };
 
-function topNav(isHome = false) {
+function topNav() {
   return `<nav class="top-nav" aria-label="Page navigation">
-    <button class="utility-button" type="button" data-nav="back" ${isHome ? 'disabled' : ''}><span aria-hidden="true">←</span> Back</button>
+    <button class="utility-button" type="button" data-nav="back"><span aria-hidden="true">←</span> Back</button>
     <button class="brand-button" type="button" data-nav="home" aria-label="Go to Picnic QR home"><img src="assets/picnic-icon-512.png" alt="" /></button>
-    <button class="utility-button" type="button" data-nav="home" ${isHome ? 'disabled' : ''}>Home <span aria-hidden="true">⌂</span></button>
   </nav>`;
 }
 
@@ -114,30 +113,35 @@ function dockMenu(kind, prefix) {
 }
 
 function showDockQr(kind, prefix, dock, locationIndex) {
+  app.innerHTML = `
+    <section class="qr-screen">
+      ${topNav()}
+      <div class="qr-content dock-qr-content"></div>
+    </section>`;
+  bindTopNav(() => dockMenu(kind, prefix));
+  renderDockQrContent(kind, prefix, dock, locationIndex);
+}
+
+function renderDockQrContent(kind, prefix, dock, locationIndex) {
   const locations = Array.from({ length: 11 }, (_, index) => String((kind === 'ambient' ? 2 : 1) + index * 2).padStart(2, '0'));
   const location = locations[locationIndex];
   const previousLocation = locations[(locationIndex - 1 + locations.length) % locations.length];
   const nextLocation = locations[(locationIndex + 1) % locations.length];
   const value = `${prefix}-${dock}-${location}`;
-  app.innerHTML = `
-    <section class="qr-screen">
-      ${topNav()}
-      <div class="qr-content dock-qr-content">
-        <canvas class="qr-code" role="img" aria-label="QR code containing ${value}"></canvas>
-        <p class="qr-value">${value}</p>
-        <div class="qr-controls" aria-label="Location controls">
-          <button class="direction-button" type="button" data-direction="previous" aria-label="Previous location: ${previousLocation}">← ${previousLocation}</button>
-          <button class="direction-button" type="button" data-direction="next" aria-label="Next location: ${nextLocation}">${nextLocation} →</button>
-        </div>
-      </div>
-    </section>`;
-  drawQr(app.querySelector('.qr-code'), value);
-  bindTopNav(() => dockMenu(kind, prefix));
-  app.querySelectorAll('[data-direction]').forEach(button => button.addEventListener('click', () => {
+  const content = app.querySelector('.dock-qr-content');
+  content.innerHTML = `
+    <canvas class="qr-code" role="img" aria-label="QR code containing ${value}"></canvas>
+    <p class="qr-value">${value}</p>
+    <div class="qr-controls" aria-label="Location controls">
+      <button class="direction-button" type="button" data-direction="previous" aria-label="Previous location: ${previousLocation}">← ${previousLocation}</button>
+      <button class="direction-button" type="button" data-direction="next" aria-label="Next location: ${nextLocation}">${nextLocation} →</button>
+    </div>`;
+  drawQr(content.querySelector('.qr-code'), value);
+  content.querySelectorAll('[data-direction]').forEach(button => button.addEventListener('click', () => {
     const nextIndex = button.dataset.direction === 'next'
       ? (locationIndex + 1) % locations.length
       : (locationIndex - 1 + locations.length) % locations.length;
-    showDockQr(kind, prefix, dock, nextIndex);
+    renderDockQrContent(kind, prefix, dock, nextIndex);
   }));
 }
 
