@@ -92,8 +92,8 @@ function dockTypeMenu(kind) {
     <section class="menu">
       <h1>${title}</h1>
       <div class="button-list">
-        <button class="nav-button" type="button" data-prefix="D">Real <span class="button-detail">(D-)</span></button>
-        <button class="nav-button" type="button" data-prefix="V">Virtual <span class="button-detail">(V-)</span></button>
+        <button class="nav-button" type="button" data-prefix="D">Real (<span class="button-detail">D-</span>)</button>
+        <button class="nav-button" type="button" data-prefix="V">Virtual (<span class="button-detail">V-</span>)</button>
       </div>
     </section>`;
   screen.querySelectorAll('[data-prefix]').forEach(button => button.addEventListener('click', () => dockMenu(kind, button.dataset.prefix)));
