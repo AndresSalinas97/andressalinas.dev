@@ -25,12 +25,19 @@ function topNav() {
   </nav>`;
 }
 
+let activeBack = null;
+app.innerHTML = `${topNav()}<div class="screen-content"></div>`;
+const persistentNav = app.querySelector('.top-nav');
+const screen = app.querySelector('.screen-content');
+persistentNav.querySelector('[data-nav="back"]').addEventListener('click', () => activeBack?.());
+persistentNav.querySelector('[data-nav="home"]').addEventListener('click', () => menu('home'));
+
 function bindTopNav(onBack) {
-  app.querySelector('[data-nav="back"]')?.addEventListener('click', onBack);
-  app.querySelectorAll('[data-nav="home"]').forEach(button => button.addEventListener('click', () => menu('home')));
+  activeBack = onBack;
+  persistentNav.hidden = !onBack;
 }
 
-function fitTitle(title = app.querySelector('h1')) {
+function fitTitle(title = screen.querySelector('h1')) {
   if (!title) return;
   title.style.fontSize = '';
   let size = parseFloat(getComputedStyle(title).fontSize);
@@ -46,9 +53,9 @@ function fitCurrentTitle() {
 
 function menu(name) {
   const section = sections[name];
-  app.innerHTML = `
+  bindTopNav(name === 'home' ? null : () => menu('home'));
+  screen.innerHTML = `
     <section class="menu">
-      ${name === 'home' ? '' : topNav()}
       ${name === 'home'
     ? `<div class="home-brand"><img src="assets/picnic-qr-logo.png" alt="Picnic QR logo" /><h1>${section.title}</h1></div>`
     : `<h1>${section.title}</h1>`}
@@ -56,69 +63,64 @@ function menu(name) {
         ${section.items.map(item => `<button class="nav-button ${item.disabled ? 'coming-soon' : ''}" type="button" ${item.disabled ? 'disabled' : ''} data-target="${item.target || ''}" data-value="${item.value || ''}">${item.label}</button>`).join('')}
       </div>
     </section>`;
-  bindTopNav(() => menu('home'));
-  app.querySelectorAll('[data-target]').forEach(button => button.addEventListener('click', () => {
+  screen.querySelectorAll('[data-target]').forEach(button => button.addEventListener('click', () => {
     if (button.dataset.target === 'chill' || button.dataset.target === 'ambient') dockTypeMenu(button.dataset.target);
     else if (button.dataset.target) menu(button.dataset.target);
   }));
-  app.querySelectorAll('[data-value]').forEach(button => button.addEventListener('click', () => {
+  screen.querySelectorAll('[data-value]').forEach(button => button.addEventListener('click', () => {
     if (button.dataset.value) showQr(button.dataset.value);
   }));
   fitCurrentTitle();
 }
 
 function showQr(value) {
-  app.innerHTML = `
+  bindTopNav(() => menu('useful'));
+  screen.innerHTML = `
     <section class="qr-screen">
-      ${topNav()}
       <div class="qr-content">
         <canvas class="qr-code" role="img" aria-label="QR code containing ${value}"></canvas>
         <p class="qr-value">${value}</p>
       </div>
     </section>`;
-  drawQr(app.querySelector('.qr-code'), value);
-  bindTopNav(() => menu('useful'));
+  drawQr(screen.querySelector('.qr-code'), value);
 }
 
 function dockTypeMenu(kind) {
   const title = kind === 'chill' ? 'Chill Docks' : 'Ambient Docks';
-  app.innerHTML = `
+  bindTopNav(() => menu('home'));
+  screen.innerHTML = `
     <section class="menu">
-      ${topNav()}
       <h1>${title}</h1>
       <div class="button-list">
         <button class="nav-button" type="button" data-prefix="D">Real <span class="button-detail">(D-)</span></button>
         <button class="nav-button" type="button" data-prefix="V">Virtual <span class="button-detail">(V-)</span></button>
       </div>
     </section>`;
-  bindTopNav(() => menu('home'));
-  app.querySelectorAll('[data-prefix]').forEach(button => button.addEventListener('click', () => dockMenu(kind, button.dataset.prefix)));
+  screen.querySelectorAll('[data-prefix]').forEach(button => button.addEventListener('click', () => dockMenu(kind, button.dataset.prefix)));
   fitCurrentTitle();
 }
 
 function dockMenu(kind, prefix) {
   const title = kind === 'chill' ? 'Chill Docks' : 'Ambient Docks';
   const docks = Array.from({ length: 8 }, (_, index) => index + 13);
-  app.innerHTML = `
+  bindTopNav(() => dockTypeMenu(kind));
+  screen.innerHTML = `
     <section class="menu">
-      ${topNav()}
       <h1>${prefix === 'D' ? 'Real' : 'Virtual'} ${title}</h1>
       <div class="dock-grid">
         ${docks.map(dock => `<button class="dock-button" type="button" data-dock="${dock}">${prefix}-${dock}</button>`).join('')}
       </div>
     </section>`;
-  bindTopNav(() => dockTypeMenu(kind));
-  app.querySelectorAll('[data-dock]').forEach(button => button.addEventListener('click', () => showDockQr(kind, prefix, Number(button.dataset.dock), 0)));
+  screen.querySelectorAll('[data-dock]').forEach(button => button.addEventListener('click', () => showDockQr(kind, prefix, Number(button.dataset.dock), 0)));
   fitCurrentTitle();
 }
 
 function showDockQr(kind, prefix, dock, locationIndex) {
-  app.innerHTML = `
+  bindTopNav(() => dockMenu(kind, prefix));
+  screen.innerHTML = `
     <section class="qr-screen">
-      ${topNav()}
       <div class="qr-content dock-qr-content"></div>
     </section>`;
-  bindTopNav(() => dockMenu(kind, prefix));
   renderDockQrContent(kind, prefix, dock, locationIndex);
 }
 
@@ -128,7 +130,7 @@ function renderDockQrContent(kind, prefix, dock, locationIndex) {
   const previousLocation = locations[(locationIndex - 1 + locations.length) % locations.length];
   const nextLocation = locations[(locationIndex + 1) % locations.length];
   const value = `${prefix}-${dock}-${location}`;
-  const content = app.querySelector('.dock-qr-content');
+  const content = screen.querySelector('.dock-qr-content');
   content.innerHTML = `
     <canvas class="qr-code" role="img" aria-label="QR code containing ${value}"></canvas>
     <p class="qr-value">${value}</p>
