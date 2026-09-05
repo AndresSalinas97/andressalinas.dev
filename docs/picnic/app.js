@@ -33,23 +33,19 @@ const screen = app.querySelector('.screen-content');
 persistentNav.querySelector('[data-nav="back"]').addEventListener('click', () => activeBack?.());
 persistentNav.querySelectorAll('[data-nav="home"]').forEach(button => button.addEventListener('click', () => menu('home')));
 
-const isIPhoneApp = /iPhone/.test(navigator.userAgent)
-  && (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone);
-if (isIPhoneApp) {
-  let swipeStart = null;
-  app.addEventListener('touchstart', event => {
-    const touch = event.changedTouches[0];
-    swipeStart = { x: touch.clientX, y: touch.clientY };
-  }, { passive: true });
-  app.addEventListener('touchend', event => {
-    if (!swipeStart || !activeBack) return;
-    const touch = event.changedTouches[0];
-    const horizontalDistance = touch.clientX - swipeStart.x;
-    const verticalDistance = Math.abs(touch.clientY - swipeStart.y);
-    if (swipeStart.x <= 36 && horizontalDistance >= 72 && verticalDistance <= 70) activeBack();
-    swipeStart = null;
-  }, { passive: true });
-}
+let swipeStart = null;
+app.addEventListener('touchstart', event => {
+  const touch = event.changedTouches[0];
+  swipeStart = { x: touch.clientX, y: touch.clientY };
+}, { passive: true });
+app.addEventListener('touchend', event => {
+  if (!swipeStart || !activeBack) return;
+  const touch = event.changedTouches[0];
+  const horizontalDistance = touch.clientX - swipeStart.x;
+  const verticalDistance = Math.abs(touch.clientY - swipeStart.y);
+  if (swipeStart.x <= 36 && horizontalDistance >= 72 && verticalDistance <= 70) activeBack();
+  swipeStart = null;
+}, { passive: true });
 
 function bindTopNav(onBack) {
   activeBack = onBack;
