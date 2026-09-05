@@ -72,7 +72,7 @@ function menu(name) {
   screen.innerHTML = `
     <section class="menu">
       ${name === 'home'
-    ? `<div class="home-brand"><img src="assets/picnic-qr-logo.png" alt="Picnic QR logo" /><h1>${section.title}</h1></div>`
+    ? `<div class="home-brand"><img src="assets/picnic-icon-512.png" alt="Picnic QR logo" /><h1>${section.title}</h1></div>`
     : `<h1>${section.title}</h1>`}
       <div class="button-list">
         ${section.items.map(item => `<button class="nav-button ${item.disabled ? 'coming-soon' : ''}" type="button" ${item.disabled ? 'disabled' : ''} data-target="${item.target || ''}" data-value="${item.value || ''}">${item.label}</button>`).join('')}
