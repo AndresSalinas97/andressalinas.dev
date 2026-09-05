@@ -102,7 +102,7 @@ function dockTypeMenu(kind) {
 
 function dockMenu(kind, prefix) {
   const title = kind === 'chill' ? 'Chill Docks' : 'Ambient Docks';
-  const docks = Array.from({ length: 8 }, (_, index) => index + 13);
+  const docks = Array.from({ length: 10 }, (_, index) => index + 11);
   bindTopNav(() => dockTypeMenu(kind));
   screen.innerHTML = `
     <section class="menu">
