@@ -30,7 +30,7 @@ app.innerHTML = `${topNav()}<div class="screen-content"></div>`;
 const persistentNav = app.querySelector('.top-nav');
 const screen = app.querySelector('.screen-content');
 persistentNav.querySelector('[data-nav="back"]').addEventListener('click', () => activeBack?.());
-persistentNav.querySelectorAll('[data-nav="home"]').forEach(button => button.addEventListener('click', () => menu('home')));
+persistentNav.querySelector('[data-nav="home"]').addEventListener('click', () => menu('home'));
 
 let swipeStart = null;
 app.addEventListener('touchstart', event => {
@@ -74,15 +74,15 @@ function menu(name) {
     ? `<div class="home-brand"><img src="assets/picnic-icon-512.png" alt="Picnic QR logo" width="512" height="512" /><h1 class="home-title">${section.title}</h1></div>`
     : `<h1>${section.title}</h1>`}
       <div class="button-list">
-        ${section.items.map(item => `<button class="nav-button ${item.disabled ? 'coming-soon' : ''}" type="button" ${item.disabled ? 'disabled' : ''} data-target="${item.target || ''}" data-value="${item.value || ''}">${item.label}</button>`).join('')}
+        ${section.items.map(item => `<button class="nav-button" type="button" ${item.target ? `data-target="${item.target}"` : `data-value="${item.value}"`}>${item.label}</button>`).join('')}
       </div>
     </section>`;
   screen.querySelectorAll('[data-target]').forEach(button => button.addEventListener('click', () => {
     if (button.dataset.target === 'chill' || button.dataset.target === 'ambient') dockTypeMenu(button.dataset.target);
-    else if (button.dataset.target) menu(button.dataset.target);
+    else menu(button.dataset.target);
   }));
   screen.querySelectorAll('[data-value]').forEach(button => button.addEventListener('click', () => {
-    if (button.dataset.value) showQr(button.dataset.value);
+    showQr(button.dataset.value);
   }));
   fitCurrentTitle();
 }
@@ -206,7 +206,7 @@ function qrData(text) {
   return [...data, ...remainder];
 }
 
-function qrMatrix(text, mask) {
+function qrMatrix(data, mask) {
   const modules = Array.from({ length: QR_SIZE }, () => Array(QR_SIZE).fill(null));
   const set = (row, column, value) => { if (row >= 0 && row < QR_SIZE && column >= 0 && column < QR_SIZE) modules[row][column] = value; };
   const finder = (row, column) => {
@@ -225,7 +225,7 @@ function qrMatrix(text, mask) {
   for (let i = 0; i < 15; i += 1) { set(...formatPosition(i), false); set(...formatSidePosition(i), false); }
   set(QR_SIZE - 8, 8, false);
 
-  const stream = qrData(text).flatMap(byte => byte.toString(2).padStart(8, '0').split('').map(bit => bit === '1'));
+  const stream = data.flatMap(byte => byte.toString(2).padStart(8, '0').split('').map(bit => bit === '1'));
   const masks = [
     (r, c) => (r + c) % 2 === 0, (r) => r % 2 === 0, (_, c) => c % 3 === 0,
     (r, c) => (r + c) % 3 === 0, (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
@@ -274,7 +274,17 @@ function qrPenalty(modules) {
 }
 
 function drawQr(canvas, text) {
-  const modules = Array.from({ length: 8 }, (_, mask) => qrMatrix(text, mask)).sort((a, b) => qrPenalty(a) - qrPenalty(b))[0];
+  const data = qrData(text);
+  let modules;
+  let lowestPenalty = Infinity;
+  for (let mask = 0; mask < 8; mask += 1) {
+    const candidate = qrMatrix(data, mask);
+    const penalty = qrPenalty(candidate);
+    if (penalty < lowestPenalty) {
+      modules = candidate;
+      lowestPenalty = penalty;
+    }
+  }
   const scale = 20, quiet = 4, size = (QR_SIZE + quiet * 2) * scale;
   canvas.width = size; canvas.height = size;
   const context = canvas.getContext('2d');
