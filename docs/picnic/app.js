@@ -21,7 +21,6 @@ const sections = {
 function topNav() {
   return `<nav class="top-nav" aria-label="Page navigation">
     <button class="utility-button" type="button" data-nav="back"><svg class="back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 10H8.2l5.6-5.6L11 1.6 1.1 11.5a.7.7 0 0 0 0 1L11 22.4l2.8-2.8L8.2 14h12.3v-4Z"/></svg> Back</button>
-    <button class="brand-button" type="button" data-nav="home" aria-label="Go to Picnic QR home"><img src="assets/picnic-icon-512.png" alt="" /></button>
     <button class="utility-button home-button" type="button" data-nav="home">Home <svg class="home-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.8 10.7 12 2.9l9.2 7.8v9.8c0 .9-.7 1.6-1.6 1.6h-5.1v-7.2h-5v7.2H4.4c-.9 0-1.6-.7-1.6-1.6v-9.8Z"/></svg></button>
   </nav>`;
 }
@@ -72,7 +71,7 @@ function menu(name) {
   screen.innerHTML = `
     <section class="menu">
       ${name === 'home'
-    ? `<div class="home-brand"><img src="assets/picnic-icon-512.png" alt="Picnic QR logo" /><h1>${section.title}</h1></div>`
+    ? `<div class="home-brand"><img src="assets/picnic-icon-512.png" alt="Picnic QR logo" width="512" height="512" /><h1 class="home-title">${section.title}</h1></div>`
     : `<h1>${section.title}</h1>`}
       <div class="button-list">
         ${section.items.map(item => `<button class="nav-button ${item.disabled ? 'coming-soon' : ''}" type="button" ${item.disabled ? 'disabled' : ''} data-target="${item.target || ''}" data-value="${item.value || ''}">${item.label}</button>`).join('')}
