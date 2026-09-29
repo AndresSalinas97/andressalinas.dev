@@ -1,3 +1,8 @@
+/**
+ * @file Caches Picnic assets for offline use with network-first fetch handling.
+ * @author Codex
+ */
+
 const CACHE_NAME = 'picnic-qr-v4';
 const APP_FILES = [
   './',
@@ -15,6 +20,7 @@ const APP_FILES = [
   './assets/picnic-icon-512.png',
 ];
 
+/** Precache the full app before activating the new worker. */
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -23,6 +29,7 @@ self.addEventListener('install', event => {
   );
 });
 
+/** Delete older Picnic caches, preserve other apps' caches and claim clients. */
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
@@ -34,7 +41,7 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Prefer the server on every launch/request, but fall back to the saved app when offline.
+/** Serve same-origin GET requests from the network, falling back to cached assets or the app shell. */
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(

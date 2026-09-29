@@ -1,3 +1,8 @@
+/**
+ * @file Validates tote numbers, formats display-only separators and renders tote entry and QR screens.
+ * @author Codex
+ */
+
 const TOTE_PARTS = [
   { label: 'Side A', prefix: '1' },
   { label: 'Side C', prefix: '3' },
@@ -6,6 +11,11 @@ const TOTE_PARTS = [
   { label: 'Compartment C', prefix: '9' },
 ];
 
+/**
+ * Accept nine digits or ten digits with a known part prefix. Preserve leading zeros and reject nonnumeric payloads.
+ * @param {string} value Typed or scanned code; surrounding whitespace is allowed.
+ * @returns {string|null}
+ */
 function parseToteNumber(value) {
   const code = value.trim();
   if (/^\d{9}$/.test(code)) return code;
@@ -14,16 +24,31 @@ function parseToteNumber(value) {
   return null;
 }
 
+/**
+ * Group a validated tote code into triplets, separating an optional prefix with a dot. Never use the result as the encoded QR payload.
+ * @param {string} code Validated nine- or ten-digit code.
+ * @returns {string}
+ */
 function formatToteCode(code) {
   const prefix = code.length === 10 ? `${code[0]}.` : '';
   const tote = code.length === 10 ? code.slice(1) : code;
   return prefix + tote.replace(/(\d{3})(?=\d)/g, '$1.');
 }
 
+/**
+ * Wrap display separators for styling. Only pass validated digit strings; this helper does not escape arbitrary HTML.
+ * @param {string} code Validated nine- or ten-digit code.
+ * @returns {string}
+ */
 function toteCodeMarkup(code) {
   return formatToteCode(code).replace(/\./g, '<span class="tote-separator">.</span>');
 }
 
+/**
+ * Render numeric entry with inline submit and scanner controls, validation feedback and a camera preview.
+ * @param {string} initialValue Optional nine-digit tote value restored when going Back.
+ * @returns {void}
+ */
 function toteMenu(initialValue = '') {
   bindTopNav(() => menu('home'));
   screen.innerHTML = `
@@ -74,6 +99,11 @@ function toteMenu(initialValue = '') {
   fitCurrentTitle();
 }
 
+/**
+ * List the two sides and three compartments for a validated tote.
+ * @param {string} tote Validated nine-digit tote number.
+ * @returns {void}
+ */
 function showToteParts(tote) {
   bindTopNav(() => toteMenu(tote));
   screen.innerHTML = `
@@ -92,6 +122,12 @@ function showToteParts(tote) {
   fitCurrentTitle();
 }
 
+/**
+ * Render one part QR code and wrap Previous/Next through all five parts. Display dots never enter the QR payload.
+ * @param {string} tote Validated nine-digit tote number.
+ * @param {number} index Zero-based index into TOTE_PARTS, 0–4.
+ * @returns {void}
+ */
 function showToteQr(tote, index) {
   const part = TOTE_PARTS[index];
   const value = `${part.prefix}${tote}`;

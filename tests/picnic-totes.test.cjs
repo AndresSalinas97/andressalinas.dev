@@ -1,3 +1,9 @@
+/**
+ * @file Regression checks for tote parsing, QR pixels, navigation and simulated camera lifecycle.
+ * Loads scripts in index.html order; does not emulate browser layout or real camera hardware.
+ * @author Codex
+ */
+
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -6,7 +12,9 @@ const vm = require('node:vm');
 const { BrowserQRCodeReader } = require('../docs/picnic/vendor/zxing-browser.min.js');
 const appDirectory = path.join(__dirname, '../docs/picnic');
 
+/** Minimal DOM test double with stable queried children and directly invocable event listeners. */
 class Element {
+  /** Initialize element state, child lookup and recorded listeners. */
   constructor() {
     this.children = new Map();
     this.listeners = {};
@@ -15,17 +23,24 @@ class Element {
     this.textContent = '';
     this.value = '';
   }
+  /** Return a stable child stub for a selector, creating it on first access. */
   querySelector(selector) {
     if (!this.children.has(selector)) this.children.set(selector, new Element());
     return this.children.get(selector);
   }
+  /** Return no repeated children; tests invoke screen functions directly instead of parsing HTML. */
   querySelectorAll() { return []; }
+  /** Record the callback so a test can dispatch this event explicitly. */
   addEventListener(event, callback) { this.listeners[event] = callback; }
+  /** Store an attribute as a property for assertions. */
   setAttribute(name, value) { this[name] = value; }
+  /** Remove a recorded attribute. */
   removeAttribute(name) { delete this[name]; }
+  /** Accept focus requests without simulating browser focus behavior. */
   focus() {}
 }
 
+/** Load production scripts in an isolated VM using the app shell script order. Return the context and screen stub. */
 function loadApp() {
   const app = new Element();
   const document = new Element();
@@ -76,11 +91,13 @@ test('manual submission validates input and lists every expected code', () => {
 });
 
 // Capture actual canvas pixels and decode them independently with ZXing.
+/** Create a minimal canvas backed by RGBA pixels for independent ZXing decoding. */
 function makeCanvas() {
   let pixels;
   const canvas = { width: 0, height: 0 };
   const drawing = {
     fillStyle: '#fff',
+    /** Paint an opaque black or white rectangle in the pixel buffer. */
     fillRect(x, y, width, height) {
       pixels ||= new Uint8ClampedArray(canvas.width * canvas.height * 4);
       const color = this.fillStyle === '#fff' ? 255 : 0;
@@ -91,8 +108,10 @@ function makeCanvas() {
         }
       }
     },
+    /** Expose the pixel buffer in the shape needed by the decoder. */
     getImageData() { return { data: pixels }; },
   };
+  // Return the same drawing context on every lookup, as a browser canvas does.
   canvas.getContext = () => drawing;
   return canvas;
 }
@@ -110,6 +129,7 @@ test('all generated tote QR codes decode to the exact expected number', () => {
   }
 });
 
+/** Create a controllable camera/decoder fixture with stop counters and injected decoded results. */
 function scannerSetup() {
   const app = loadApp();
   const form = new Element();
@@ -118,7 +138,9 @@ function scannerSetup() {
   const stream = { getTracks: () => [{ stop() { stoppedTracks++; } }] };
   let callback;
   app.context.loadScannerLibrary = async () => ({
+    /** Scanner library test double; only the streaming API is needed here. */
     BrowserMultiFormatReader: class {
+      /** Capture the result callback and return counted scan controls without accessing a camera. */
       async decodeFromStream(_stream, _video, onResult) {
         callback = onResult;
         return { stop() { stoppedControls++; } };
@@ -128,8 +150,11 @@ function scannerSetup() {
   app.context.navigator.mediaDevices.getUserMedia = async () => stream;
   return {
     ...app, form, stream,
+    /** Deliver a decoded string through the captured production scan callback. */
     result(value) { callback({ getText: () => value }); },
+    /** Return the number of requested media-track stops. */
     get stoppedTracks() { return stoppedTracks; },
+    /** Return the number of requested decoder stops. */
     get stoppedControls() { return stoppedControls; },
   };
 }

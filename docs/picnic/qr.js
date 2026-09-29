@@ -1,5 +1,8 @@
-// A compact QR encoder for the short, fixed labels in this app.
-// It creates version 1 / medium-error-correction QR codes directly on a canvas.
+/**
+ * @file Encodes short labels as version 1, medium-error-correction QR codes and draws them on canvas. Supports at most 14 UTF-8 bytes; callers must enforce that limit.
+ * @author Codex
+ */
+
 const QR_SIZE = 21;
 const qrExp = new Array(512).fill(0);
 const qrLog = new Array(256).fill(0);
@@ -10,10 +13,21 @@ for (let i = 0, number = 1; i < 255; i += 1) {
 }
 for (let i = 255; i < 512; i += 1) qrExp[i] = qrExp[i - 255];
 
+/**
+ * Multiply two bytes in the QR finite field using exponent and logarithm lookup tables.
+ * @param {number} left First byte.
+ * @param {number} right Second byte.
+ * @returns {number}
+ */
 function qrMultiply(left, right) {
   return !left || !right ? 0 : qrExp[qrLog[left] + qrLog[right]];
 }
 
+/**
+ * Build 16 byte-mode data codewords and 10 Reed–Solomon error-correction codewords.
+ * @param {string} text Payload of at most 14 UTF-8 bytes.
+ * @returns {number[]}
+ */
 function qrData(text) {
   const bytes = new TextEncoder().encode(text);
   const bits = [...'0100', ...bytes.length.toString(2).padStart(8, '0')].map(Number);
@@ -43,9 +57,17 @@ function qrData(text) {
   return [...data, ...remainder];
 }
 
+/**
+ * Place finder, timing, format and payload modules in a 21×21 matrix using one mask.
+ * @param {number[]} data Data and error-correction codewords from qrData.
+ * @param {number} mask Mask index, 0–7.
+ * @returns {boolean[][]}
+ */
 function qrMatrix(data, mask) {
   const modules = Array.from({ length: QR_SIZE }, () => Array(QR_SIZE).fill(null));
+  /** Write a module only when its coordinates lie inside the matrix. */
   const set = (row, column, value) => { if (row >= 0 && row < QR_SIZE && column >= 0 && column < QR_SIZE) modules[row][column] = value; };
+  /** Draw a 7×7 finder pattern and its one-module separator at the given origin. */
   const finder = (row, column) => {
     for (let y = -1; y <= 7; y += 1) for (let x = -1; x <= 7; x += 1) {
       set(row + y, column + x, y >= 0 && y <= 6 && x >= 0 && x <= 6 && (y === 0 || y === 6 || x === 0 || x === 6 || (y >= 2 && y <= 4 && x >= 2 && x <= 4)));
@@ -54,15 +76,18 @@ function qrMatrix(data, mask) {
   finder(0, 0); finder(0, 14); finder(14, 0);
   for (let i = 8; i < 13; i += 1) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
 
+  /** Map a format-bit index to its vertical-copy row and column. */
   const formatPosition = index => [
     index < 6 ? index : index < 8 ? index + 1 : QR_SIZE - 15 + index,
     8,
   ];
+  /** Map a format-bit index to its horizontal-copy row and column. */
   const formatSidePosition = index => [8, index < 8 ? QR_SIZE - index - 1 : index < 9 ? 15 - index : 14 - index];
   for (let i = 0; i < 15; i += 1) { set(...formatPosition(i), false); set(...formatSidePosition(i), false); }
   set(QR_SIZE - 8, 8, false);
 
   const stream = data.flatMap(byte => byte.toString(2).padStart(8, '0').split('').map(bit => bit === '1'));
+  /** Each predicate returns whether to invert the payload module at row r, column c. */
   const masks = [
     (r, c) => (r + c) % 2 === 0, (r) => r % 2 === 0, (_, c) => c % 3 === 0,
     (r, c) => (r + c) % 3 === 0, (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0,
@@ -92,6 +117,11 @@ function qrMatrix(data, mask) {
   return modules;
 }
 
+/**
+ * Score long same-color runs and uniform 2×2 blocks. This compact heuristic does not implement every QR mask penalty rule.
+ * @param {boolean[][]} modules Completed QR matrix.
+ * @returns {number}
+ */
 function qrPenalty(modules) {
   let score = 0;
   for (const lines of [modules, modules[0].map((_, column) => modules.map(row => row[column]))]) {
@@ -110,6 +140,12 @@ function qrPenalty(modules) {
   return score;
 }
 
+/**
+ * Choose the lowest-scoring mask and draw a black/white QR with a four-module quiet zone and 20 pixels per module.
+ * @param {HTMLCanvasElement} canvas Canvas whose dimensions and pixels are replaced.
+ * @param {string} text Payload of at most 14 UTF-8 bytes.
+ * @returns {void}
+ */
 function drawQr(canvas, text) {
   const data = qrData(text);
   let modules;

@@ -1,3 +1,8 @@
+/**
+ * @file Initializes Picnic QR and owns shared navigation, home and useful-location screens.
+ * @author Codex
+ */
+
 const app = document.querySelector('#app');
 
 const sections = {
@@ -19,6 +24,10 @@ const sections = {
   },
 };
 
+/**
+ * Build the persistent Back and Home navigation markup.
+ * @returns {string}
+ */
 function topNav() {
   return `<nav class="top-nav" aria-label="Page navigation">
     <button class="utility-button" type="button" data-nav="back"><svg class="back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 10H8.2l5.6-5.6L11 1.6 1.1 11.5a.7.7 0 0 0 0 1L11 22.4l2.8-2.8L8.2 14h12.3v-4Z"/></svg> Back</button>
@@ -47,12 +56,22 @@ app.addEventListener('touchend', event => {
   swipeStart = null;
 }, { passive: true });
 
+/**
+ * Stop scanning, set the Back action and hide navigation on the home screen.
+ * @param {(() => void)|null} onBack Back action; null hides navigation.
+ * @returns {void}
+ */
 function bindTopNav(onBack) {
   stopToteScanner();
   activeBack = onBack;
   persistentNav.hidden = !onBack;
 }
 
+/**
+ * Shrink a heading until it fits, with an 18px lower limit.
+ * @param {HTMLElement|null} title Heading to resize; defaults to the current screen heading.
+ * @returns {void}
+ */
 function fitTitle(title = screen.querySelector('h1')) {
   if (!title) return;
   title.style.fontSize = '';
@@ -63,10 +82,19 @@ function fitTitle(title = screen.querySelector('h1')) {
   }
 }
 
+/**
+ * Schedule heading measurement after the current screen has rendered.
+ * @returns {void}
+ */
 function fitCurrentTitle() {
   requestAnimationFrame(() => fitTitle());
 }
 
+/**
+ * Render a configured menu and connect its navigation and QR buttons.
+ * @param {'home'|'useful'} name Menu key in sections.
+ * @returns {void}
+ */
 function menu(name) {
   const section = sections[name];
   bindTopNav(name === 'home' ? null : () => menu('home'));
@@ -90,6 +118,11 @@ function menu(name) {
   fitCurrentTitle();
 }
 
+/**
+ * Render a useful-location QR code with Back returning to useful locations.
+ * @param {string} value Short location label to encode.
+ * @returns {void}
+ */
 function showQr(value) {
   bindTopNav(() => menu('useful'));
   screen.innerHTML = `

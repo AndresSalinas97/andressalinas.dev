@@ -1,3 +1,9 @@
+/*
+ * Picnic QR layout, controls, tote screens, responsive sizing and themes.
+ * Author: Codex
+ * Component classes are documented in README.md.
+ */
+
 :root {
   color-scheme: light;
   --ink: #1a1a18;

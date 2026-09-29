@@ -1,3 +1,13 @@
+/**
+ * @file Renders real and virtual dock menus and cycles through their location QR codes.
+ * @author Codex
+ */
+
+/**
+ * Show Real and Virtual choices for the selected dock kind.
+ * @param {'ambient'|'chill'} kind Dock temperature category.
+ * @returns {void}
+ */
 function dockTypeMenu(kind) {
   const title = kind === 'chill' ? 'Chill Docks' : 'Ambient Docks';
   bindTopNav(() => menu('home'));
@@ -13,6 +23,12 @@ function dockTypeMenu(kind) {
   fitCurrentTitle();
 }
 
+/**
+ * Show docks 11 through 20 and return to the dock-type menu on Back.
+ * @param {'ambient'|'chill'} kind Dock temperature category.
+ * @param {'D'|'V'} prefix Real or virtual dock prefix.
+ * @returns {void}
+ */
 function dockMenu(kind, prefix) {
   const title = kind === 'chill' ? 'Chill Docks' : 'Ambient Docks';
   const docks = Array.from({ length: 10 }, (_, index) => index + 11);
@@ -28,6 +44,14 @@ function dockMenu(kind, prefix) {
   fitCurrentTitle();
 }
 
+/**
+ * Create the dock QR screen and render its initial location.
+ * @param {'ambient'|'chill'} kind Dock temperature category.
+ * @param {'D'|'V'} prefix Real or virtual dock prefix.
+ * @param {number} dock Dock number, 11–20.
+ * @param {number} locationIndex Zero-based location index, 0–11.
+ * @returns {void}
+ */
 function showDockQr(kind, prefix, dock, locationIndex) {
   bindTopNav(() => dockMenu(kind, prefix));
   screen.innerHTML = `
@@ -37,6 +61,14 @@ function showDockQr(kind, prefix, dock, locationIndex) {
   renderDockQrContent(kind, prefix, dock, locationIndex);
 }
 
+/**
+ * Render a dock location and wrapping Previous/Next controls. Ambient uses even locations; chill uses odd locations.
+ * @param {'ambient'|'chill'} kind Dock temperature category.
+ * @param {'D'|'V'} prefix Real or virtual dock prefix.
+ * @param {number} dock Dock number, 11–20.
+ * @param {number} locationIndex Zero-based location index, 0–11.
+ * @returns {void}
+ */
 function renderDockQrContent(kind, prefix, dock, locationIndex) {
   const locations = Array.from({ length: 12 }, (_, index) => String((kind === 'ambient' ? 2 : 1) + index * 2).padStart(2, '0'));
   const location = locations[locationIndex];

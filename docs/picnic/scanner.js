@@ -1,12 +1,24 @@
+/**
+ * @file Loads the local barcode decoder on demand and manages camera startup, cancellation and teardown.
+ * @author Codex
+ */
+
 let scannerLibrary;
 let stopActiveScanner = null;
 
+/**
+ * Stop the active scan and clear its cleanup callback. Safe when no scanner is active.
+ * @returns {void}
+ */
 function stopToteScanner() {
   stopActiveScanner?.();
   stopActiveScanner = null;
 }
 
-// Load the bundled decoder only when the camera is requested.
+/**
+ * Reuse a single decoder-loading promise. Reset it after a loading failure so the next scan can retry.
+ * @returns {Promise<object>}
+ */
 function loadScannerLibrary() {
   if (!scannerLibrary) {
     scannerLibrary = new Promise((resolve, reject) => {
@@ -24,6 +36,11 @@ function loadScannerLibrary() {
   return scannerLibrary;
 }
 
+/**
+ * Request a rear-facing camera, decode tote labels locally and open valid results. Surface camera errors in the form and release late streams after cancellation.
+ * @param {HTMLFormElement} form Mounted tote form containing camera controls and status elements.
+ * @returns {Promise<void>}
+ */
 async function startToteScanner(form) {
   stopToteScanner();
   const status = form.querySelector('[data-scan-status]');
@@ -38,6 +55,7 @@ async function startToteScanner(form) {
   let cancelled = false;
   let stream;
   let controls;
+  // Session cleanup also marks pending asynchronous work as cancelled.
   stopActiveScanner = () => {
     cancelled = true;
     controls?.stop();
@@ -65,6 +83,7 @@ async function startToteScanner(form) {
     }
     const reader = new library.BrowserMultiFormatReader();
     status.textContent = 'Point the camera at a tote barcode or QR code.';
+    // Ignore empty frames; valid results navigate away and stop this session.
     controls = await reader.decodeFromStream(stream, video, result => {
       if (cancelled || !result) return;
       const tote = parseToteNumber(result.getText());
