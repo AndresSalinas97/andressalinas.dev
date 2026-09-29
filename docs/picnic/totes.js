@@ -96,6 +96,8 @@ function toteMenu(initialValue = '') {
   });
   form.querySelector('[data-scan]').addEventListener('click', () => startToteScanner(form));
   form.querySelector('[data-stop-scan]').addEventListener('click', stopToteScanner);
+  // Keep focus synchronous with the opening tap so iOS can show the keypad.
+  input.focus();
   fitCurrentTitle();
 }
 
