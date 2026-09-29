@@ -32,7 +32,7 @@ button {
   touch-action: manipulation;
 }
 
-button:focus-visible {
+button:focus-visible, input:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
@@ -255,6 +255,127 @@ h1 {
   min-height: 54px;
   padding: 10px;
   font-size: 1rem;
+}
+
+/* Tote entry, camera preview and generated codes. */
+.tote-menu > h1 {
+  margin-top: 20px;
+}
+
+.tote-form {
+  display: grid;
+  gap: 14px;
+  margin-bottom: auto;
+}
+
+.tote-form label {
+  font-weight: 750;
+}
+
+.tote-status, .tote-error {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.tote-error:empty, .tote-status:empty {
+  display: none;
+}
+
+.tote-error {
+  font-weight: 700;
+}
+
+.tote-input-group {
+  position: relative;
+}
+
+.tote-submit, .tote-scan-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--utility);
+  color: var(--utility-ink);
+}
+
+.tote-submit {
+  right: 5px;
+  font-size: 1.5rem;
+}
+
+.tote-scan-button {
+  right: 54px;
+}
+
+.tote-scan-button svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.tote-form input {
+  width: 100%;
+  min-height: 54px;
+  padding: 12px 108px 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.2rem;
+}
+
+.tote-form input[aria-invalid="true"] {
+  border-color: var(--accent);
+}
+
+.tote-form button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.tote-scanner video {
+  display: block;
+  width: 100%;
+  max-height: 40dvh;
+  margin-bottom: 12px;
+  border-radius: 16px;
+  background: #000;
+}
+
+.tote-scanner button {
+  width: 100%;
+}
+
+.tote-part .button-detail {
+  display: block;
+  margin-top: 6px;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.tote-qr-content {
+  gap: 16px;
+}
+
+.tote-qr-content h1 {
+  margin: 0;
+}
+
+.tote-qr-content .qr-code {
+  width: min(82vw, max(180px, calc(100dvh - 330px)), 620px);
+}
+
+.tote-separator {
+  font-size: 0.7em;
+  opacity: 0.4;
 }
 
 @media (min-width: 700px) {
